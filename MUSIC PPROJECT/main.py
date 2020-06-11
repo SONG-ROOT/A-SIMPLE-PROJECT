@@ -34,7 +34,7 @@ class Dmain(QMainWindow):
         \n我希望在自己能用的基础上，热爱音乐的人也能用的上。当然要比较懂计算机才能用的好。\n适用人群：\
         \n热爱音乐的网易云中国用户。仅供音乐热爱者个人使用，未经允许拿去做爬虫，商业化，先死个妈\n软件编写：\n使用python PYQT5第三方库构建图形化界面。\
         \n使用requests库联网发送请求。\n使用JSON库数据类型转换。\n使用re库匹配时间戳提取。\
-        \n在linux,windows上均可运行.WINDOWS上体验很差，建议在LINUX上运行\n\n                                             ---by 宋健 2020.5.31'
+        \n在linux,windows上均可运行.\n\n                                             ---by 宋健 2020.5.31'
 
         self.initUI()
         
@@ -114,7 +114,7 @@ class Dmain(QMainWindow):
                         self.errid=self.errid+','+n
                         self.QTextEdit_4.setText('已获取歌曲信息，与服务器建立新连接获取歌词成功，但该歌曲未收录，\nERROR ID：'+self.errid)
                         self.QTextEdit_5.setText('ERROR ID：'+self.errid)
-                    elif TRANSlation[1]=='无翻译' or self.NO_NEED_TRA.isChecked()==True:
+                    elif TRANSlation[1]=='无翻译' or self.NO_NEED_TRA.isChecked()==True or TRANSlation[1]=='没有翻译且大概率是无时间戳歌词':
                         ssd=HEBING.SIMPLE_NO_TRA(TRANSlation)
                         self.QTextEdit_4.setText(ssd)
                     else:
@@ -160,7 +160,7 @@ class Dmain(QMainWindow):
                         elif TRANSlation == '未收录':
                             self.error_info=self.error_info+'已获取歌曲信息，与服务器建立新连接获取歌词成功，但该歌曲未收录？ERROR ID：'+str(i)+'\n'
                             self.QTextEdit_10.setText(self.error_info)
-                        elif TRANSlation[1]=='无翻译' or self.DO_NOT_TRANSLATE.isChecked()==True:
+                        elif TRANSlation[1]=='无翻译' or self.DO_NOT_TRANSLATE.isChecked()==True  or TRANSlation[1]=='没有翻译且大概率是无时间戳歌词':
                             ssd=HEBING.SIMPLE_NO_TRA(TRANSlation)
                             self.error_info=self.error_info+'DONE!,成功 ID：'+str(i)+'\n'
                             self.QTextEdit_10.setText(self.error_info)
@@ -278,7 +278,7 @@ class Dmain(QMainWindow):
         self.QTextEdit_13 = QTextEdit(self.tab_3);self.QTextEdit_13.setGeometry(560,465,400,40)
         self.button_7 = QPushButton("路径选择",self.tab_3);self.button_7.setGeometry(1000,465,100,30)
         self.QTextEdit_14 = QTextEdit(self.tab_3);self.QTextEdit_14.setGeometry(170,300,850,150)
-        self.QTextEdit_14.setText('使用须知：\nID 格式：ID,ID,ID,ID\nID与ID之间由逗号(,)隔开\n注意是英文逗号,不是汉语逗号\nPython脚本WINDOWS上运行缓慢\n推荐在LINUX上运行')
+        self.QTextEdit_14.setText('使用须知：\nID 格式：ID,ID,ID,ID\nID与ID之间由逗号(,)隔开\n注意是英文逗号,不是汉语逗号\nPython脚本WINDOWS，LINUX均可运行')
         self.QTextEdit_14.setTextInteractionFlags(Qt.NoTextInteraction)
         self.DO_NOT_TRANSLATE=QCheckBox('不需要中文翻译', self.tab_3);self.DO_NOT_TRANSLATE.move(10,350)
         self.DO_NOT_TRANSLATE.setChecked(False)
