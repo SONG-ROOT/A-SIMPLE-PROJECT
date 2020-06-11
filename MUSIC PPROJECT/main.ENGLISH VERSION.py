@@ -34,7 +34,7 @@ class Dmain(QMainWindow):
         \nI hope that people who love music can use it on the basis of I can use fisrt. Of course, it"s better to understand computers.\nApplicable population：\
         \nChinese users of Netease cloud who love music. It"s only for music lovers" personal use.Those who use it as Crawler without permission, or commercialize it, you die first\nSoftware writing：\nUse Python pyqt5 third-party library to build graphical interface.\
         \nUse the requests library to send requests online.\nUse JSON library data type conversion.\nUse re library to match timestamp extraction.\
-        \nIt can run on Linux and windows. Windows has a poor experience. It is recommended to run on Linux\n\n                                             ---by 宋健 2020.6.1'
+        \nIt can run on Linux and windows. \n\n                                             ---by 宋健 2020.6.1'
 
         self.initUI()
         
@@ -114,7 +114,7 @@ class Dmain(QMainWindow):
                         self.errid=self.errid+','+n
                         self.QTextEdit_4.setText('The song information has been obtained, and a new connection with the server has been established to obtain the lyrics successfully, but the song is not included，\nERROR ID：'+self.errid)
                         self.QTextEdit_5.setText('ERROR ID：'+self.errid)
-                    elif TRANSlation[1]=='无翻译' or self.NO_NEED_TRA.isChecked()==True:
+                    elif TRANSlation[1]=='无翻译' or self.NO_NEED_TRA.isChecked()==True or TRANSlation[1]=='没有翻译且大概率是无时间戳歌词':
                         ssd=HEBING.SIMPLE_NO_TRA(TRANSlation)
                         self.QTextEdit_4.setText(ssd)
                     else:
@@ -159,7 +159,7 @@ class Dmain(QMainWindow):
                         elif TRANSlation == '未收录':
                             self.error_info=self.error_info+'The song information has been obtained, and a new connection with the server has been established to obtain the lyrics successfully, but the song is not included？\nERROR ID：'+str(i)+'\n'
                             self.QTextEdit_10.setText(self.error_info)
-                        elif TRANSlation[1]=='无翻译' or self.DO_NOT_TRANSLATE.isChecked()==True:
+                        elif TRANSlation[1]=='无翻译' or self.DO_NOT_TRANSLATE.isChecked()==True  or TRANSlation[1]=='没有翻译且大概率是无时间戳歌词':
                             ssd=HEBING.SIMPLE_NO_TRA(TRANSlation)
                             self.error_info=self.error_info+'DONE! Success ID：'+str(i)+'\n'
                             self.QTextEdit_10.setText(self.error_info)
@@ -277,7 +277,7 @@ class Dmain(QMainWindow):
         self.QTextEdit_13 = QTextEdit(self.tab_3);self.QTextEdit_13.setGeometry(560,465,400,40)
         self.button_7 = QPushButton("path",self.tab_3);self.button_7.setGeometry(1000,465,100,30)
         self.QTextEdit_14 = QTextEdit(self.tab_3);self.QTextEdit_14.setGeometry(170,300,850,150)
-        self.QTextEdit_14.setText('Instructions for use：\nID format：ID,ID,ID,ID\nSeparate ID from ID by ,\nNotice it”s English , not Chinese ，\nPython scripts run slowly on Windows\nRecommended to run on LINUX')
+        self.QTextEdit_14.setText('Instructions for use：\nID format：ID,ID,ID,ID\nSeparate ID from ID by ,\nNotice it”s English , not Chinese ，\nPython scripts can run on Windows and on LINUX')
         self.QTextEdit_14.setTextInteractionFlags(Qt.NoTextInteraction)
         self.DO_NOT_TRANSLATE=QCheckBox('No Chinese\n translation\n required', self.tab_3);self.DO_NOT_TRANSLATE.move(10,350)
         self.DO_NOT_TRANSLATE.setChecked(False)
