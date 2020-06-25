@@ -13,9 +13,16 @@ def LIST_BULID(b,c):#传入歌词列表，return文本（有翻译）
                 ENGLISH.remove('')
             else:
                 K=0
-        for i in ENGLISH:
-            a=re.compile(r'\[(.*?)\]').findall(i)
-            unreliable_time_line.append(a[0])#只选第一个时间线,后面的不要 
+        for i in range(len(ENGLISH)):
+            a=re.compile(r'\[(.*?)\]').findall(ENGLISH[i])
+            if a != []:#奇葩的翻译格式,导致我必须额外增加校验
+                unreliable_time_line.append(a[0])#只选第一个时间线,后面的不要 
+            elif a==[] and i==0:
+                ENGLISH[i]='[00:00.88]'+ENGLISH[i]
+            else:
+                pass
+                
+
 
 
         #原文列表理应和临时时间线列表 项数 一致，我根据临时时间线拿取中文翻译
@@ -37,7 +44,7 @@ def LIST_BULID(b,c):#传入歌词列表，return文本（有翻译）
         print(str(d))
 
 def SIMPLE_NO_TRA(b):#传入歌词列表，return文本（无翻译）
-    try:              
+    try:             
         b[0]=b[0]+'\n'
         ENGLISH=b[0].split('\n')
         STRR=''
