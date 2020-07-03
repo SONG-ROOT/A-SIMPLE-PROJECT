@@ -1,0 +1,10 @@
+22824296 
+不带时间戳且没有翻译的歌词
+No translation and no time stamp
+
+28258308,27571714 
+奇葩的翻译方式导致我的程序崩溃 
+My program crashed because of the strange translation format
+2020.6.25
+
+243243 123732

@@ -1,0 +1,14 @@
+#警告：如果你不知道你在做什么,你不要动这个文件
+
+CMD  :                              HIDE S                     # 改成 HIDE 隐藏控制台，其余情况都会显示控制台。仅WINDOWS系统有效
+SAVE_PATH :                    .                             # 预先设定要保存的目录,避免每次重复设置路径
+
+#下面的内容是User-Agent ，乱改这个可能会出现未知错误。
+
+User-Agent :                    None                      #默认不设置请求头 即为None
+
+#备用请求头：Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36
+#备用请求头：Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50
+#备用请求头：Mozilla/5.0 (Windows; U; Windows NT 6.1; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50
+#获取更多请求头，你可以访问这个网站
+#https://blog.csdn.net/chang995196962/article/details/93715295
