@@ -1,11 +1,13 @@
 #coding=utf-8
 import os,sys,ctypes
 from PyQt5.QtWidgets import QMainWindow,QApplication,QDesktopWidget,QTextEdit,QPushButton\
-    ,QMessageBox,QLabel,QFileDialog,QTabWidget,QWidget,QCheckBox,QAction
+    ,QMessageBox,QLabel,QFileDialog,QTabWidget,QWidget,QCheckBox,QAction,QComboBox
 from PyQt5.QtCore import Qt
 import json
 import threading
 import time
+import re
+import webbrowser
 
 from EASY_X import ID#私有模块
 from EASY_X import URL_1#私有模块
@@ -37,7 +39,7 @@ class Dmain(QMainWindow):
     def __init__(self,config_import):
         super().__init__()
         self.path=''#要扫描的目录
-        self.userid=os.getlogin()#用户名
+        self.userid=os.getlogin()#当前用户名
         self.errid=''#出错的ID记录
         self.SONG_IMFORMATION=''#歌曲信息：包括艺人名，专辑名，歌曲名。用于合成文件名
         self.SONG_WILL_BE_SAVE=''#提取完成的歌词和翻译文本
@@ -50,9 +52,9 @@ class Dmain(QMainWindow):
         \n我希望在自己能用的基础上，热爱音乐的人也能用的上。当然要比较懂计算机才能用的好。\n适用人群：\
         \n热爱音乐的网易云中国用户。仅供音乐热爱者个人使用，未经允许拿去做爬虫，商业化，先死个妈\n软件编写：\n使用python PYQT5第三方库构建图形化界面。\
         \n使用requests库联网发送请求。\n使用JSON库数据类型转换。\n使用re库匹配时间戳提取。\
-        \n在linux,windows上均可运行.\n\n                                             ---by 宋健 2020.5.31'
+        \n在linux,windows上均可运行.\n\n                                             ---by 荒野79 2020.5.31'
         
-        self.CONFIG_DIC=config_import
+        self.CONFIG_DIC=config_import#读取的配置文件
         self.initUI()
         
 
@@ -60,17 +62,17 @@ class Dmain(QMainWindow):
         self.setGeometry(200, 150, 1152,648)
         self.center()#窗口居中
         self.my_ui()#纯UI
-        self.SET_UI_EVENT()#BUTTON CLICK EVENT
-        self.setWindowTitle('网易云歌词提取 V1.03')
+        self.SET_UI_EVENT()#按钮点击事件
+        self.setWindowTitle('网易云歌词提取 V1.05')
         self.show()
         
-    def SET_UI_EVENT(self):#UI点击事件
-        if os.name=='nt':
+    def SET_UI_EVENT(self):#设定UI点击事件
+        if os.name=='nt':#初始扫描目录显示
             self.QTextEdit_1.setText(os.path.join(r'C:\Users',self.userid,'AppData','Local','Netease','CloudMusic','webdata','lyric'))
         elif os.name=='posix':
             self.QTextEdit_1.setText(os.path.join('/home',self.userid,'.cache','netease-cloud-music','TempFiles')) 
 
-        if self.CONFIG_DIC['SAVE_PATH']=='.':
+        if self.CONFIG_DIC['SAVE_PATH']=='.':#初始保存目录设定
             pass
         else:
             self.QTextEdit_8.setText(self.CONFIG_DIC['SAVE_PATH'])
@@ -82,8 +84,9 @@ class Dmain(QMainWindow):
         self.button_5.clicked.connect(self.SAVE_2)
         self.button_6.clicked.connect(self.BATCH_SAVE)
         self.button_7.clicked.connect(self.SAVE_4)
+        self.choose()
 
-##################################### TEST ONLY ##########################################
+##################################### PAGE_1 function    ##########################################
     def path_choose(self):
         fname = QFileDialog.getExistingDirectory(self, '选择要扫描的目录', '/home/')
         if fname:
@@ -101,6 +104,7 @@ class Dmain(QMainWindow):
             self.IDLIST=ID.OPEN_FILE_DEEPIN(self.path)
             self.QTextEdit_2.setText(self.IDLIST)
 
+###############################    PAGE_2   function     ##################################
     def URL_R(self):            #ID提取测试平台
         n=self.QTextEdit_3.toPlainText()#MUSIC ID
         a=URL_1.URL_GET(n,self.CONFIG_DIC['User-Agent'])#拿到服务器返回的JSON
@@ -148,7 +152,7 @@ class Dmain(QMainWindow):
                         self.QTextEdit_4.setText(ssd)
                         self.SONG_WILL_BE_SAVE=ssd
 
-###################################### 批量保存 ################################################
+###################################### page_3 function 批量保存 ################################################
     def BATCH_SAVE(self):
         n=self.QTextEdit_9.toPlainText()
         try:
@@ -199,19 +203,19 @@ class Dmain(QMainWindow):
                             self.SONG_WILL_BE_SAVE=ssd
                             self.SAVE_3()
         QMessageBox.information(self,'NICE','DONE!')
-######################################## SAVE #############################################
+######################################## page_2&3 SAVE #############################################
     def Special_Character_Clean(self,text):
         f=text.replace('<','').replace('>','').replace('|','').replace('*','').replace('"','')
         s=f.replace('?','').replace(':','').replace('/','').replace('‪','').replace('\\','')
         return s
-    def SAVE_1(self):
+    def SAVE_1(self):#page_2 path choose
         fname = QFileDialog.getExistingDirectory(self, '选择要扫描的目录', '/home/')
         if fname:
             self.QTextEdit_8.setText(fname)
         else:
             QMessageBox.warning(self,'空路径','至少选择一个路径!    ')
 
-    def SAVE_2(self):
+    def SAVE_2(self):#page_2
         try:
             name_1=self.SONG_IMFORMATION.split(',',-1)
             name_2=name_1[0]+' - '+name_1[1]+'.lrc'
@@ -226,13 +230,12 @@ class Dmain(QMainWindow):
         except Exception as f:
             self.QTextEdit_4.setText(str(f))
 
-    def SAVE_3(self):
+    def SAVE_3(self):#page_3
         try:
             name_1=self.SONG_IMFORMATION.split(',',-1)
             name_2=name_1[0]+' - '+name_1[1]+'.lrc'
             name=self.Special_Character_Clean(name_2)
             path_1=self.QTextEdit_13.toPlainText()
-            
             path_2=os.path.join(path_1,name)
             PATH=os.path.normpath(path_2)  #规范路径
             with open(PATH,'w',encoding='utf-8') as u:
@@ -241,7 +244,7 @@ class Dmain(QMainWindow):
         except Exception as f:
             self.error_info=self.error_info+'文件保存时，处理错误!,失败 ID：'+str(i)
             self.QTextEdit_10.setText(self.error_info)
-    def SAVE_4(self):
+    def SAVE_4(self):#page_3 path choose
         fname = QFileDialog.getExistingDirectory(self, '选择要扫描的目录', '/home/')
         if fname:
             self.QTextEdit_13.setText(fname)
@@ -256,15 +259,15 @@ class Dmain(QMainWindow):
         self.move(qr.topLeft())
     def my_ui(self):#仅仅画出程序UI
         self.tabWidget_1 = QTabWidget(self);self.tabWidget_1.setGeometry(10,30,1130,600)
-        self.tab_1= QWidget();self.tab_2= QWidget();self.tab_3= QWidget()
-        self.tabWidget_1.addTab(self.tab_1, "歌曲选取");self.tabWidget_1.addTab(self.tab_2, "歌曲提取测试台");self.tabWidget_1.addTab(self.tab_3, "批量提取")
+        self.tab_1= QWidget();self.tab_2= QWidget();self.tab_3= QWidget();self.tab_4= QWidget()
+        self.tabWidget_1.addTab(self.tab_1, "歌曲选取");self.tabWidget_1.addTab(self.tab_2, "歌曲提取测试台");self.tabWidget_1.addTab(self.tab_3, "批量提取");self.tabWidget_1.addTab(self.tab_4, "实时链接转ID")
         
         #################### PAGE 1########################
         self.label_1 = QLabel('输入要扫描的路径：',self.tab_1);self.label_1.setGeometry(10,5,150,30)
         self.QTextEdit_1 = QTextEdit(self.tab_1);self.QTextEdit_1.setGeometry(170,5,850,40)
         self.button_1 = QPushButton("路径选择",self.tab_1);self.button_1.setGeometry(10,60,100,30)
         self.button_2 = QPushButton("开始扫描",self.tab_1);self.button_2.setGeometry(120,60,100,30)
-        self.QTextEdit_2 = QTextEdit("提示: 双击选中文字！鼠标右键copy",self.tab_1);self.QTextEdit_2.setGeometry(170,120,850,150)
+        self.QTextEdit_2 = QTextEdit("提示: 双击选中文字，三击全选！鼠标右键copy",self.tab_1);self.QTextEdit_2.setGeometry(170,120,850,150)
         self.DEEP_SCAN=QCheckBox('打开文件扫描 for linux', self.tab_1);self.DEEP_SCAN.move(10,350)
         self.DEEP_SCAN.setChecked(False)
         ############################### PAGE 2 ##########################
@@ -307,19 +310,31 @@ class Dmain(QMainWindow):
         self.QTextEdit_14.setTextInteractionFlags(Qt.NoTextInteraction)
         self.DO_NOT_TRANSLATE=QCheckBox('不需要中文翻译', self.tab_3);self.DO_NOT_TRANSLATE.move(10,350)
         self.DO_NOT_TRANSLATE.setChecked(False)
-        ######################## 
+        ######################## PAGE 4 ##################################
+        self.label_8 = QLabel('链接输入框:',self.tab_4);self.label_8.setGeometry(10,5,150,30)
+        self.QTextEdit_15 = QTextEdit(self.tab_4);self.QTextEdit_15.setGeometry(10,35,600,40)
+        self.label_9 = QLabel('输出ID:',self.tab_4);self.label_9.setGeometry(10,80,150,30)
+        self.QTextEdit_16 = QTextEdit(self.tab_4);self.QTextEdit_16.setGeometry(10,110,700,40)
+        self.label_10 = QLabel('每过一段时间检测输入框中的内容，进行转化。\n转化前：http://music.163.com/song?id=12345678&userid=9876543210 \n转化后：12345678\n\n链接获取：打开网易云客户端，打开歌单（不管是自己的还是别人的歌单）选中音乐标题一栏中的歌名，\n点击鼠标右键，复制链接,黏贴到这里,就得到ID了\n\n\n建议时间间隔为三秒，防止刷新过快复制不到',self.tab_4)
+        self.label_10.setGeometry(10,200,1000,300)
+
+        ######################## 菜单 ####################################
+        self.statusBar()#创建一个菜单栏
+        fileMenu =self.menuBar().addMenu('&总控制台')#菜单栏中添加主项
+
         exitAction = QAction( '&软件介绍', self)#菜单下拉项 显示内容         
         exitAction.setShortcut('Ctrl+B')# 此操作的快捷方式
         exitAction.setStatusTip('我要说的。balabala')#菜单下拉项 状态栏显示内容
-        exitAction_1 = QAction( '&修改配置文件', self);exitAction_1.setStatusTip('修改程序的配置文件，重启后生效')#菜单下拉项 状态栏显示内容
-
-        self.statusBar()#创建一个菜单栏
-        fileMenu =self.menuBar().addMenu('&总控制台')#菜单栏中添加主项
-        fileMenu.addAction(exitAction)#添加写好的exitAction事件
-        fileMenu.addAction(exitAction_1)
-
         exitAction.triggered.connect(self.TELL_ABOUT)
-        exitAction_1.triggered.connect(self.OPEN_SHELL)
+        fileMenu.addAction(exitAction)#添加写好的exitAction事件
+
+        exitAction_1 = QAction( '&修改配置文件', self);exitAction_1.setStatusTip('修改程序的配置文件，重启后生效');fileMenu.addAction(exitAction_1);exitAction_1.triggered.connect(self.OPEN_SHELL)
+        exitAction_2 = QAction( '&更新', self);fileMenu.addAction(exitAction_2);exitAction_2.triggered.connect(self.MAY_BE_LAST_VERSION)
+
+        fileMenu_open_webbrowser =self.menuBar().addMenu('&访问')
+        exitAction_webbrowser_0=QAction( 'python官网', self);fileMenu_open_webbrowser.addAction(exitAction_webbrowser_0);exitAction_webbrowser_0.triggered.connect(self.webbrower)
+        exitAction_webbrowser_1=QAction( 'Github', self);fileMenu_open_webbrowser.addAction(exitAction_webbrowser_1);exitAction_webbrowser_1.triggered.connect(self.webbrower)
+        exitAction_webbrowser_2=QAction( 'musicbee', self);fileMenu_open_webbrowser.addAction(exitAction_webbrowser_2);exitAction_webbrowser_2.triggered.connect(self.webbrower)
 
     def TELL_ABOUT(self):
         QMessageBox.about(self,"标题",self.I_WANT_TO_SAY)
@@ -334,6 +349,55 @@ class Dmain(QMainWindow):
             print("执行了线程 ",a)
         b=threading.Thread(target=run,args=("001",))
         b.start()
+####################################    PAGE_4 timer and work    ##########################################
+    def choose(self):#选择时间间隔
+        combo = QComboBox(self.tab_4);combo.addItem('几秒一次');combo.addItem("0.1");combo.addItem("0.5");combo.addItem("1")
+        combo.addItem("2");combo.addItem("3");combo.addItem("5");combo.addItem("关闭此功能")
+        combo.move(10,160)
+        combo.activated[str].connect(self.onActivated)
+    def onActivated(self, text):#选择时间间隔后的选项
+        if text!='关闭此功能' and text!='几秒一次':
+            self.time_inval=float(text)
+            self.check_num_word()
+        else:
+            try:
+                self.killTimer(self.timer_id_autodisp)#杀掉残留
+                self.QTextEdit_16.setText('已经杀死计数器！')
+            except:
+                pass
+    def check_num_word(self):#开启指定时间间隔的定时器
+        try:
+            self.killTimer(self.timer_id_autodisp)#新定时器前尝试杀掉残留
+        except:
+            pass
+        self.timer_id_autodisp=self.startTimer(int(self.time_inval*1000))   #ms定时器
+        self.timer_id_cnt=6000  #定时器运行次数
+    def timerEvent(self, *args, **kwargs):#timer所做的事情
+        QApplication.processEvents()
+
+        input_txt=self.QTextEdit_15.toPlainText()#获取文本框内容
+        IDS=re.compile(r'id=(.*?)&userid').findall(input_txt)
+        if IDS !=[]:
+            self.QTextEdit_16.setText(IDS[0])
+        else:
+            self.QTextEdit_16.setText('没有合适内容')
+
+        self.timer_id_cnt -= 1
+        if self.timer_id_cnt == 0:
+            self.killTimer(self.timer_id_autodisp)
+            self.QTextEdit_16.setText('计数次数已经耗尽！，请重新计数！')
+###############################    WEB_OPEN    #################################
+    def MAY_BE_LAST_VERSION(self):
+        QMessageBox.about(self,"标题",'不出意外的话这该是最后一次功能更新了，功能方面懒得改了。我很早就发现当一首歌有两个歌手时，文件名只会是一个歌手的名字，但大部分歌曲都是一个歌手。碰到这种情况，手动复制黏贴一下另一个歌手的名字就好了。  -- 2020.8.5')
+    def webbrower(self):
+        sender = self.sender()#sender()方法来判断当前按下的是哪个按钮
+        self.statusBar().showMessage(sender.text() + ' was pressed')
+        if sender.text() =='python官网':
+            webbrowser.open("https://www.python.org")
+        elif sender.text() =='Github':
+            webbrowser.open("https://github.com/SONG-ROOT/A-SIMPLE-PROJECT")
+        elif sender.text() =='musicbee':
+            webbrowser.open("https://getmusicbee.com")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
